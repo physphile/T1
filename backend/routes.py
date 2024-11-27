@@ -21,6 +21,6 @@ async def headers():
     return {"headers": get_table_headers()}
 
 
-@root.get("/groups")
+@root.post("/groups")
 async def groups(reference_columns: list[str]):
     return fuzzy_group(reference_columns)
