@@ -10,6 +10,7 @@ from fastapi_pagination import add_pagination
 root = APIRouter()
 add_pagination(root)
 
+
 @root.post("/generate")
 async def generate(files: Annotated[list[bytes], File()]):
     create_virtual_table(files)

@@ -9,12 +9,12 @@ class Settings(BaseSettings):
     """Application settings"""
 
     DB_DSN: str = "sqlite+pysqlite:///database.sqlite"
-    ROOT_PATH: str = '/' + os.getenv('APP_NAME', '')
+    ROOT_PATH: str = "/" + os.getenv("APP_NAME", "")
 
-    CORS_ALLOW_ORIGINS: list[str] = ['*']
+    CORS_ALLOW_ORIGINS: list[str] = ["*"]
     CORS_ALLOW_CREDENTIALS: bool = True
-    CORS_ALLOW_METHODS: list[str] = ['*']
-    CORS_ALLOW_HEADERS: list[str] = ['*']
+    CORS_ALLOW_METHODS: list[str] = ["*"]
+    CORS_ALLOW_HEADERS: list[str] = ["*"]
     model_config = ConfigDict(case_sensitive=True, env_file=".env", extra="ignore")
 
 
