@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+fastapi-pagination
+pandas
+sqlalchemy
+fastapi-sqlalchemy
+pydantic
+pydantic_settings
+python-multipart
+psycopg2
