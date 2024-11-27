@@ -54,7 +54,7 @@ def get_table_headers():
     return list(map(lambda row: row[1], result))
 
 
-def fuzzy_group():
+def fuzzy_group(reference_columns):
     try:
         result = db.session.execute(
             text(
@@ -76,6 +76,90 @@ def fuzzy_group():
                     on soundex(t1.client_fio_full) = t2.snd'''
             )
         )
+        # result = db.session.execute(
+        #     text(
+        #         f'''WITH NormalizedRecords AS (
+        #             SELECT 
+        #                 id,
+        #                 client_fio_full,
+        #                 client_bday,
+        #                 LOWER(REPLACE(REPLACE(client_fio_full, ' ', ''), '-', '')) AS normalized_name,
+        #                 LOWER(SUBSTRING_INDEX(client_fio_full, ' ', 1)) AS first_part,
+        #                 LOWER(SUBSTRING_INDEX(SUBSTRING_INDEX(client_fio_full, ' ', 2), ' ', -1)) AS middle_part,
+        #                 LOWER(SUBSTRING_INDEX(client_fio_full, ' ', -1)) AS last_part
+        #             FROM 
+        #                 users_table
+        #         ),
+        #         SimilarityGroups AS (
+        #             SELECT 
+        #                 client_bday,
+        #                 normalized_name,
+        #                 (
+        #                     SELECT client_fio_full 
+        #                     FROM NormalizedRecords n2 
+        #                     WHERE 
+        #                         n2.client_bday = n1.client_bday AND
+        #                         (
+        #                             levenshtein(n1.normalized_name, n2.normalized_name) <= 2 OR
+        #                             LOWER(n1.client_fio_full) LIKE '%' || LOWER(n2.client_fio_full) || '%' OR
+        #                             LOWER(n2.client_fio_full) LIKE '%' || LOWER(n1.client_fio_full) || '%' OR
+        #                             (
+        #                                 n1.first_part = n2.first_part AND 
+        #                                 (n1.last_part = n2.last_part OR n1.middle_part = n2.middle_part)
+        #                             )
+        #                         )
+        #                     LIMIT 1
+        #                 ) AS representative_name,
+        #                 ARRAY_AGG(id) AS group_ids,
+        #                 ARRAY_AGG(client_fio_full) AS group_names
+        #             FROM 
+        #                 users_table u1
+        #             JOIN 
+        #                 NormalizedRecords n1 ON u1.id = n1.id
+        #             GROUP BY 
+        #                 client_bday, normalized_name
+        #         )
+        #         SELECT 
+        #             JSON_AGG(
+        #                 JSON_BUILD_OBJECT(
+        #                     'client_fio_full', representative_name,
+        #                     'date_birth', client_bday,
+        #                     'group_size', group_size,
+        #                     'group_ids', group_ids,
+        #                     'group_names', group_names,
+        #                     'properties', (
+        #                         SELECT JSON_AGG(
+        #                             JSON_BUILD_OBJECT(
+        #                                 'id', id,
+        #                                 'client_fio_full', client_fio_full,
+        #                                 'properties', (
+        #                                     SELECT json_object_agg(key, value)
+        #                                     FROM (
+        #                                         SELECT 
+        #                                             key, 
+        #                                             value 
+        #                                         FROM jsonb_each(to_jsonb(u.*)) 
+        #                                         WHERE 
+        #                                             key NOT IN ('id', 'client_fio_full', 'client_bday') AND
+        #                                             (
+        #                                                 (value IS NOT NULL AND value::text != '') OR
+        #                                                 jsonb_typeof(value) = 'number' OR
+        #                                                 jsonb_typeof(value) = 'boolean'
+        #                                             )
+        #                                     ) AS extra_properties
+        #                                 )
+        #                             )
+        #                         )
+        #                         FROM users_table u
+        #                         WHERE u.id = ANY(group_ids)
+        #                     )
+        #                 )
+        #             ) AS grouped_users
+        #         FROM 
+        #             SimilarityGroups
+        #         '''
+        #     )
+        # )
 
         # result = db.session.execute(
         #     text(

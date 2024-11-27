@@ -22,5 +22,5 @@ async def headers():
 
 
 @root.get("/groups")
-async def groups():
-    return fuzzy_group()
+async def groups(reference_columns: list[str]):
+    return fuzzy_group(reference_columns)
