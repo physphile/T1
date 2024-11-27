@@ -238,3 +238,47 @@ def fuzzy_group(reference_columns):
         raise HTTPException(status_code=422)
 
     return result.mappings().all()[:100]
+def create_golden_table(reference_columns):
+    try:
+        result = db.session.execute(
+                text(
+                    f'''CREATE TABLE IF NOT EXISTS GOLDEN_TABLE (LIKE {TABLE_NAME} INCLUDING ALL);'''))
+    except OperationalError as e:
+        logger.critical(e)
+        raise HTTPException(status_code=422)
+
+def frequence_analisys_column(reference_column):
+    try:
+        result = db.session.execute(
+            text(
+                f'''DO $$
+DECLARE
+    column_record RECORD;  
+    most_frequent_value TEXT; 
+BEGIN
+    FOR column_record IN 
+        SELECT COLUMN_NAME 
+        FROM INFORMATION_SCHEMA.COLUMNS 
+        WHERE TABLE_SCHEMA = 'DM_INFRA_LOGS' AND TABLE_NAME = 'incident_hint'
+    LOOP
+        EXECUTE format('
+            SELECT %I 
+            FROM "DM_INFRA_LOGS".incident_hint 
+            GROUP BY %I 
+            HAVING COUNT(*) = (
+                SELECT COUNT(*) 
+                FROM "DM_INFRA_LOGS".incident_hint 
+                GROUP BY %I 
+                ORDER BY COUNT(*) DESC 
+                LIMIT 1
+            )', column_record.column_name, column_record.column_name, column_record.column_name)
+        INTO most_frequent_value;
+
+        RAISE NOTICE column_record.column_name, most_frequent_value;
+    END LOOP;
+END $$;'''))
+    except OperationalError as e:
+        logger.critical(e)
+        raise HTTPException(status_code=422)
+
+    return result.mappings().all()[:100]
