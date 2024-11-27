@@ -3,8 +3,9 @@ uvicorn
 fastapi-pagination
 pandas
 sqlalchemy
-fastapi-sqlalchemy
+fastapi_sqlalchemy
 pydantic
 pydantic_settings
 python-multipart
 psycopg2
+dotenv

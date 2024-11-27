@@ -1,14 +1,16 @@
 import os
 from functools import lru_cache
 
+from dotenv import load_dotenv
 from pydantic import ConfigDict
 from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
     """Application settings"""
+    load_dotenv(".env")
 
-    DB_DSN: str = "sqlite+pysqlite:///database.sqlite"
+    DB_DSN: str = os.getenv("DB_DSN", "sqlite+pysqlite:///database.sqlite")
     ROOT_PATH: str = "/" + os.getenv("APP_NAME", "")
 
     CORS_ALLOW_ORIGINS: list[str] = ["*"]

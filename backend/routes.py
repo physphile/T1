@@ -1,11 +1,8 @@
-from utils import (
-    create_virtual_table,
-    fuzzy_group,
-    get_table_headers,
-)
 from typing import Annotated
+
 from fastapi import APIRouter, File
 from fastapi_pagination import add_pagination
+from utils import create_virtual_table, fuzzy_group, get_table_headers
 
 root = APIRouter()
 add_pagination(root)

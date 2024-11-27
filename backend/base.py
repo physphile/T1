@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_sqlalchemy import DBSessionMiddleware
-from settings import get_settings
 from routes import root
+from settings import get_settings
 
 app = FastAPI()
 settings = get_settings()
