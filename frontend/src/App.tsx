@@ -1,34 +1,74 @@
-import { FormEventHandler, useCallback, useState } from "react";
-import axios from "axios";
+import { useCallback, useEffect, useState } from 'react';
+import axios from 'axios';
+import { FilePicker } from './components/FilePicker';
+
+import styles from './App.module.css';
+import { Button, Card, Checkbox, Flex } from '@gravity-ui/uikit';
+import { useForm } from 'react-hook-form';
 
 export const App: React.FC = () => {
-  const [headers, setHeaders] = useState<string[]>([]);
-  // const [groups, setGroups] = useState({});
+	// const [groups, setGroups] = useState({});
+	const [files, setFiles] = useState<File[]>([]);
+	const { watch, setValue } = useForm<{
+		columns: Array<{ content: string; value: boolean }>;
+	}>({
+		defaultValues: { columns: [] },
+	});
+	const [groups, setGroups] = useState({});
 
-  const generateDatabase = useCallback<FormEventHandler>(async (event) => {
-    event.preventDefault();
-    const formData = new FormData(event.target as HTMLFormElement);
-    await axios.post("http://localhost:8000/generate", formData);
+	const generateDatabase = useCallback(async () => {
+		const formData = new FormData();
+		for (const file of files) {
+			formData.set('files', file);
+		}
+		await axios.post('http://localhost:8000/generate', formData);
 
-    const {
-      data: { headers },
-    } = await axios.get<{ headers: string[] }>("http://localhost:8000/headers");
+		const {
+			data: { headers },
+		} = await axios.get<{ headers: string[] }>('http://localhost:8000/headers');
 
-    setHeaders(headers);
+		setValue(
+			'columns',
+			headers.map(columnName => ({ content: columnName, value: false }))
+		);
 
-    await axios.get("http://localhost:8000/groups");
-  }, []);
+		const { data } = await axios.get('http://localhost:8000/groups');
+		setGroups(data);
+	}, [files, setValue]);
 
-  return (
-    <div>
-      <form onSubmit={generateDatabase}>
-        <input type="file" name="files" multiple accept=".csv" />
-        <button type="submit">Отправить</button>
-      </form>
+	useEffect(() => {
+		console.log(watch('columns'));
+	});
 
-      <pre>{JSON.stringify(headers, null, 2)}</pre>
-    </div>
-  );
+	return (
+		<div className={styles.container}>
+			<Card className={styles.card}>
+				<FilePicker files={files} onChange={newFiles => setFiles(newFiles)} />
+			</Card>
+
+			<Flex direction="column" gap={1}>
+				{watch('columns').map(({ content }, index) => (
+					<Checkbox
+						size="l"
+						key={content}
+						content={content}
+						onUpdate={checked => setValue(`columns.${index}`, { content, value: checked })}
+					/>
+				))}
+			</Flex>
+
+			<Button
+				size="xl"
+				onClick={() => {
+					generateDatabase();
+				}}
+			>
+				Загрузить
+			</Button>
+
+			<pre>{JSON.stringify(groups, null, 2)}</pre>
+		</div>
+	);
 };
 
 export default App;

@@ -8,7 +8,7 @@ from custom_logger import log
 import logging
 
 TABLE_NAME = "fuzzy"
-logger = log(name="backend", level=logging.DEBUG, log_folder_path="backend/logs")
+logger = log(name="backend", level=logging.DEBUG, log_folder_path="logs")
 
 
 def create_virtual_table(csvs: list[bytes]):
