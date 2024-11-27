@@ -8,10 +8,12 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     """Application settings"""
+
     load_dotenv(".env")
 
     DB_DSN: str = os.getenv("DB_DSN", "sqlite+pysqlite:///database.sqlite")
     ROOT_PATH: str = "/" + os.getenv("APP_NAME", "")
+    AVAILABLE_CORES: int = os.cpu_count()/2
 
     CORS_ALLOW_ORIGINS: list[str] = ["*"]
     CORS_ALLOW_CREDENTIALS: bool = True
