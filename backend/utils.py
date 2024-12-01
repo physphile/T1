@@ -403,7 +403,7 @@ def create_golden_table(reference_columns):
         raise HTTPException(status_code=422)
 
 def frequence_analisys_column(reference_column):
-    try:
+    try: #тут не дм инфра логс, просто тестилось на нем хддд
         result = db.session.execute(
             text(
                 f'''DO $$
@@ -411,7 +411,7 @@ DECLARE
     column_record RECORD;  
     most_frequent_value TEXT; 
 BEGIN
-    FOR column_record IN 
+    FOR column_record IN
         SELECT COLUMN_NAME 
         FROM INFORMATION_SCHEMA.COLUMNS 
         WHERE TABLE_SCHEMA = 'DM_INFRA_LOGS' AND TABLE_NAME = 'incident_hint'
